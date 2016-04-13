@@ -2,7 +2,7 @@
 Live Mode
 =========
 
-Repeatedly process the most recent video available on the server. 
+Repeatedly process the most recent video available on the server.
 
 Requires: OpenCV 3+
 """
@@ -31,9 +31,12 @@ def main():
     log = open('Log.txt', 'w')
     lastTimeStamp = -1
     time.clock()
-    user = 'bee'
-    pw = 'cs.13,bee'
-    ftp = FTP('cs.appstate.edu', user, pw)
+    f = open('auth', 'r')
+    user = f.readline().strip()
+    pw = f.readline().strip()
+    server = f.readline().strip()
+    f.close()
+    ftp = FTP(server, user, pw)
 
     running = True
 
@@ -45,17 +48,17 @@ def main():
         ftp.cwd('/usr/local/bee/beemon/pit1')
         ret = ftp.retrlines('LIST', splitDirLine)
         sortDirsByDate(dirs)
-        newestDir = dirs[0]
+        newestDir = dirs[1]
         ftp.cwd("{0}/video".format(newestDir))
 
         # get most recent video file
-        ret = ftp.retrlines('LIST', splitFileLine)    
+        ret = ftp.retrlines('LIST', splitFileLine)
         sortFilesByTime(files)
         newestFile = files[0]
         if newestFile == lastVideo:
             waitTime = lastWait * 2
             print("Waiting for {0}ms for next video".format(waitTime))
-            if tools.handle_keys(waitTime) == 1: 
+            if tools.handle_keys(waitTime) == 1:
                 break
             lastWait = waitTime
             continue
@@ -77,11 +80,11 @@ def main():
         timeStr = time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime())
         logStr = "{0} {1}\n".format(timeStr, str(totalFlow))
         log.write(logStr)
-        
+
         arrivals.append(app.arrivals)
         departures.append(app.departures)
 
-        # print("Arrivals: {0} Departures: {1}".format(app.arrivals, app.departures))
+        print("Arrivals: {0} Departures: {1}".format(app.arrivals, app.departures))
 
         os.remove('tempfile.h264')
         del(files[:])

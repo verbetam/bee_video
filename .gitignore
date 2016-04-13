@@ -44,3 +44,6 @@ videos/
 source/test.py
 samples/
 *.vec
+
+source/auth
+source/Log.txt

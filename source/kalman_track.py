@@ -10,6 +10,7 @@ ESC - exit
 import numpy as np
 import cv2
 import sys
+import re
 from time import clock
 from matplotlib import pyplot
 from collections import namedtuple
@@ -17,7 +18,7 @@ from collections import namedtuple
 
 # Project
 from track import Track
-import tools 
+import tools
 from tools import model_bg2, morph_openclose, cross, handle_keys
 import drawing
 from drawing import GREEN, RED, BLUE
@@ -33,17 +34,17 @@ MAX_AREA = 1500
 
 FRAME_DELAY = 33
 
-TRANSITION_MATRIX = np.array([[1, 0, 1, 0], 
+TRANSITION_MATRIX = np.array([[1, 0, 1, 0],
                               [0, 1, 0, 1],
                               [0, 0, 1, 0],
                               [0, 0, 0, 1]], np.float32)
 
-MEASUREMENT_MATRIX = np.array([[1, 0, 0, 0], 
+MEASUREMENT_MATRIX = np.array([[1, 0, 0, 0],
                                [0, 1, 0, 0]], np.float32)
 
 
 class App:
-    def __init__(self, video_src="", quiet=False, invisible=False, draw_contours=False, 
+    def __init__(self, video_src="", quiet=False, invisible=False, draw_contours=False,
                  bgsub_thresh=64, drawTracks=False, drawFrameNum=False, drawBoundary=False):
         self.quiet = quiet
         self.invisible = invisible
@@ -60,7 +61,7 @@ class App:
         self.operator.model_bg2(video_src)
 
         self.cam = cv2.VideoCapture(video_src)
-        
+
         self.maxTimeInvisible = 0
         self.trackAgeThreshold = 4
 
@@ -76,25 +77,26 @@ class App:
         prev_gray = None
         prev_points = []
         self.nextTrackID = 0
-        
+
         while True:
             # Get frame
             ret, frame = self.cam.read()
             if not ret:
                 break
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            
+
             # Segment
             fg_mask = self.operator.apply(frame)
             fg_mask = ((fg_mask == 255) * 255).astype(np.uint8)
             fg_mask = morph_openclose(fg_mask)
-            
+
             # Detect blobs
-            if "3.0." in cv2.__version__:
-                _, contours, _ = cv2.findContours((fg_mask.copy()), cv2.RETR_EXTERNAL, 
+            version = int(re.findall(r'\d+', cv2.__version__)[0])
+            if version == 3:
+                _, contours, _ = cv2.findContours((fg_mask.copy()), cv2.RETR_EXTERNAL,
                     cv2.CHAIN_APPROX_TC89_L1)
             else:
-                contours, _ = cv2.findContours((fg_mask.copy()), cv2.RETR_EXTERNAL, 
+                contours, _ = cv2.findContours((fg_mask.copy()), cv2.RETR_EXTERNAL,
                     cv2.CHAIN_APPROX_TC89_L1)
             areas, detections = drawing.draw_min_ellipse(contours, frame, MIN_AREA, MAX_AREA, draw=False)
             self.areas += areas
@@ -146,7 +148,7 @@ class App:
             else:
                 self.lostTracks.append(track)
                 tracksLost += 1
-        # print("Tracks lost", tracksLost)        
+        # print("Tracks lost", tracksLost)
         self.tracks = newTracks
 
     def createNewTracks(self, detections, unmatchedDetections):
@@ -283,4 +285,4 @@ def main():
 if __name__ == '__main__':
     main()
 
-        
+

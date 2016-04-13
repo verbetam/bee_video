@@ -1,4 +1,5 @@
 import cv2
+import re
 import numpy as np
 
 GREEN = (0, 255, 0)
@@ -23,11 +24,12 @@ def draw_prev_points(frame, points, color=BLUE, radius=2):
 
 def draw_contours(frame, fg_mask):
     assert frame is not None
-    if cv2.__version__ == '3.0.0':
-        _, contours, hierarchy = cv2.findContours((fg_mask.copy()), 
+    version = int(re.findall(r'\d+', cv2.__version__)[0])
+    if version == 3:
+        _, contours, hierarchy = cv2.findContours((fg_mask.copy()),
             cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_L1)
     else:
-        contours, hierarchy = cv2.findContours((fg_mask.copy()), 
+        contours, hierarchy = cv2.findContours((fg_mask.copy()),
             cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_L1)
     cv2.drawContours(frame, contours, -1, (0, 255, 0), hierarchy=hierarchy, maxLevel=2)
     return contours, hierarchy
