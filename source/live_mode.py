@@ -28,20 +28,20 @@ totalFlowSamples = []
 
 def main():
     global totalFlow
-    log = open('Log.txt', 'w')
+    log = open('log', 'w')
     lastTimeStamp = -1
     time.clock()
-    f = open('auth', 'r')
-    user = f.readline().strip()
-    pw = f.readline().strip()
+    f      = open('auth', 'r')
+    user   = f.readline().strip()
+    pw     = f.readline().strip()
     server = f.readline().strip()
     f.close()
     ftp = FTP(server, user, pw)
 
     running = True
-
     lastVideo = None
     lastWait = 256
+
     app = App()
     while running:
         # get most recent day directory
@@ -84,7 +84,7 @@ def main():
         arrivals.append(app.arrivals)
         departures.append(app.departures)
 
-        print("Arrivals: {0} Departures: {1}".format(app.arrivals, app.departures))
+        # print("Arrivals: {0} Departures: {1}".format(app.arrivals, app.departures))
 
         os.remove('tempfile.h264')
         del(files[:])

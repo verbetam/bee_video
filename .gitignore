@@ -46,4 +46,4 @@ samples/
 *.vec
 
 source/auth
-source/Log.txt
+source/log
