@@ -16,7 +16,7 @@ The live_mode.py script will use this information to retrieve files for tracking
 With Anaconda3:
 ```bash
 // Install opencv3
-$ conda install -c https://conda/anaconda.org/menpo opencv3
+$ conda install -c https://conda.anaconda.org/menpo opencv3
 // May be needed base on windows manager
 $ conda install asmeurer pango
 $ cd source
