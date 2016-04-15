@@ -46,11 +46,11 @@ MEASUREMENT_MATRIX = np.array([[1, 0, 0, 0],
 class App:
     def __init__(self, video_src="", quiet=False, invisible=False, draw_contours=False,
                  bgsub_thresh=64, drawTracks=False, drawFrameNum=False, drawBoundary=False):
-        self.quiet = quiet
-        self.invisible = invisible
+        self.quiet        = quiet
+        self.invisible    = invisible
         self.drawContours = draw_contours
-        self.threshold = bgsub_thresh
-        self.drawTracks = drawTracks
+        self.threshold    = bgsub_thresh
+        self.drawTracks   = drawTracks
         self.drawFrameNum = drawFrameNum
         self.drawBoundary = drawBoundary
 
@@ -62,20 +62,21 @@ class App:
 
         self.cam = cv2.VideoCapture(video_src)
 
-        self.maxTimeInvisible = 0
+        self.maxTimeInvisible  = 0
         self.trackAgeThreshold = 4
 
-        self.tracks = []
+        self.tracks     = []
         self.lostTracks = []
-        self.frame_idx = 0
-        self.arrivals = self.departures = 0
+        self.frame_idx  = 0
+        self.arrivals   = 0
+        self.departures = 0
 
     def run(self, as_script=True):
         if self.invisible:
             cv2.namedWindow("Control")
 
-        prev_gray = None
-        prev_points = []
+        prev_gray        = None
+        prev_points      = []
         self.nextTrackID = 0
 
         while True:
@@ -83,11 +84,12 @@ class App:
             ret, frame = self.cam.read()
             if not ret:
                 break
+            # Convert frame to grayscale
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             # Segment
             fg_mask = self.operator.apply(frame)
-            fg_mask = ((fg_mask == 255) * 255).astype(np.uint8)
+            fg_mask = (255 if fg_mask == 255 else 0).astype(np.uint8)
             fg_mask = morph_openclose(fg_mask)
 
             # Detect blobs
@@ -96,6 +98,7 @@ class App:
                 _, contours, _ = cv2.findContours((fg_mask.copy()), cv2.RETR_EXTERNAL,
                     cv2.CHAIN_APPROX_TC89_L1)
             else:
+                # Get contours for detected bees using the foreground mask
                 contours, _ = cv2.findContours((fg_mask.copy()), cv2.RETR_EXTERNAL,
                     cv2.CHAIN_APPROX_TC89_L1)
             areas, detections = drawing.draw_min_ellipse(contours, frame, MIN_AREA, MAX_AREA, draw=False)
@@ -143,9 +146,9 @@ class App:
 
             # Determine lost tracks
             if not ((track.age < self.trackAgeThreshold and visibilty < .6) or
-                    (track.timeInvisible > self.maxTimeInvisible)):
+                    (track.timeInvisible > self.maxTimeInvisible)): #track valid
                 newTracks.append(track)
-            else:
+            else: #track invalid
                 self.lostTracks.append(track)
                 tracksLost += 1
         # print("Tracks lost", tracksLost)
@@ -186,9 +189,9 @@ class App:
 
     def updateUnmatchedTracks(self, unmatchedTracks):
         for trackIndex in unmatchedTracks:
-            tr = self.tracks[trackIndex]
-            tr.age += 1
-            tr.timeInvisible += 1
+            track = self.tracks[trackIndex]
+            track.age += 1
+            track.timeInvisible += 1
 
     def assignTracks(self, detections, frame):
         """ Returns assignments, unmatchedTracks, unmatchedDetections """

@@ -70,7 +70,7 @@ def assignment(costMatrix, costOfNonAssignment=140):
             pad_width = [(0, np.abs(diff)), (0, 0)]
         if diff > 0:
             pad_width = [(0, 0), (0, diff)]
-        costMatrix = np.pad(costMatrix, pad_width, mode='constant', 
+        costMatrix = np.pad(costMatrix, pad_width, mode='constant',
             constant_values=(padValue, padValue))
     # Compute the optimal assignment
     assign = linear_assignment(costMatrix)
