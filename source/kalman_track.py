@@ -89,7 +89,7 @@ class App:
 
             # Segment
             fg_mask = self.operator.apply(frame)
-            fg_mask = (255 if fg_mask == 255 else 0).astype(np.uint8)
+            fg_mask = ((fg_mask == 255) * 255).astype(np.uint8)
             fg_mask = morph_openclose(fg_mask)
 
             # Detect blobs
